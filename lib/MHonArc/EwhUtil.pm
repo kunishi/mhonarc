@@ -25,7 +25,8 @@
 ##---------------------------------------------------------------------------##
 
 package MHonArc::EwhUtil;
-use HTML::Entities qw(encode_entities);
+use HTML::Entities;
+use URI::Escape;
 
 my $HTMLSpecials = '"&<>';
 my %HTMLSpecials = (
@@ -89,15 +90,7 @@ sub cp {
 ##	Translate html string back to regular string
 ##
 sub dehtmlize {
-    my $str   = shift;
-    my $str_r = ref($str) ? $str : \$str;
-    $$str_r =~ s/\&lt;/</g;
-    $$str_r =~ s/\&gt;/>/g;
-    $$str_r =~ s/\&#[xX]0*40;/@/g;
-    $$str_r =~ s/\&#64;/@/g;
-    $$str_r =~ s/\&quot;/"/g;
-    $$str_r =~ s/\&amp;/\&/g;
-    $$str_r;
+    return HTML::Entities::decode_entities($_[0]);
 }
 
 ##---------------------------------------------------------------------------
@@ -105,16 +98,12 @@ sub dehtmlize {
 ##
 sub urlize {
     my($url) = shift || "";
-    my $url_r = ref($url) ? $url : \$url;
-    $$url_r =~ s/([^\w\.\-:])/sprintf("%%%02X",unpack("C",$1))/ge;
-    $$url_r;
+    return URI::Escape::uri_escape($url);
 }
 
 sub urlize_path {
     my($url) = shift || "";
-    my $url_r = ref($url) ? $url : \$url;
-    $$url_r =~ s/([^\w\.\-:\/])/sprintf("%%%02X",unpack("C",$1))/ge;
-    $$url_r;
+    return URI::Escape::uri_escape($url, "^A-Za-z0-9\-_.!~*'()/");
 }
 
 ##---------------------------------------------------------------------------##
